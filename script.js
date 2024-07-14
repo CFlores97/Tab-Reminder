@@ -147,10 +147,10 @@ function validateForm() {
     return true;
 }
 
-
 /* Eventos de los botones */
 
 document.getElementById("next_month").addEventListener('click', getNextMonth);
+
 document.getElementById("last_month").addEventListener('click', getPrevMonth);
 
 document.getElementById("addBtn").addEventListener('click', function (event) {
@@ -242,10 +242,23 @@ document.addEventListener('DOMContentLoaded', function () {
     var dayElements = document.querySelectorAll('.item_day');
     dayElements.forEach(function (dayElement) {
         dayElement.addEventListener('click', function () {
-            var day = parseInt(this.textContent); 
-            console.log("El day es de tipo: " + typeof(day));
+            var day = parseInt(this.textContent);
+            console.log("El day es de tipo: " + typeof (day));
             var selectedDate = getSelectedDate(day);
+
+            // TODO: Logica para utilizar la fecha seleccionada
             alert("La fecha seleccionada: " + selectedDate);
+        });
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    var priorities = document.querySelectorAll('.priority-btn');
+    priorities.forEach(function (priorityElement) {
+        priorityElement.addEventListener('click', function () {
+            var selPriority = this.textContent;
+            selPriority.trim();
+            alert("La prioridad seleccionada es: " + selPriority);
         });
     });
 });
