@@ -10,6 +10,7 @@ var month = now.getMonth();
 var year = now.getFullYear();
 
 var currentMonth = month;
+var currentDay = day;
 
 initCalendar();
 
@@ -36,20 +37,13 @@ function initCalendar() {
 
     for (let i = 1; i <= getTotalDays(month); i++) {
         var diaSpan = document.createElement('span');
-
-        if (i == day && month == currentMonth) {
+        if (i === day && month === currentMonth) {
             diaSpan.className = "week_days_item item_day today";
-            diaSpan.id = "item_day";
-            diaSpan.textContent = i;
-            container.appendChild(diaSpan);
         } else {
             diaSpan.className = "week_days_item item_day";
-            diaSpan.id = "item_day";
-            diaSpan.textContent = i;
-            container.appendChild(diaSpan);
         }
-
-
+        diaSpan.textContent = i;
+        container.appendChild(diaSpan);
     }
 }
 
@@ -101,10 +95,19 @@ function getStartDay() {
 }
 
 // retorna la fecha seleccionada, en un objeto "Date"
+function getSelectedDate(day) {
+    var yearElement = document.getElementById("text_year").textContent;
+    var monthElement = document.getElementById("text_month_02").textContent;
 
-function getSelectedDate(){
-    var selYear = document.getElementById("text_year");
-    var selMonth = document.getElementById("text_month_02");
+    var selMonth = monthNames.indexOf(monthElement);
+
+    var selYear = parseInt(yearElement);
+    //var selMonth = parseInt(monthElement);
+
+    console.log("Año: " + selYear + ", Mes: " + monthElement + ", Día: " + day);
+
+    var selDate = new Date(selYear, selMonth, day);
+    return selDate;
 }
 
 // Se encarga de mostrar el formulario, con una transicion
@@ -233,6 +236,18 @@ document.getElementById("save-btn").addEventListener('click', function () {
         alert("Ocurrio un error!");
         console.log("Error: ", error.message);
     }
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    var dayElements = document.querySelectorAll('.item_day');
+    dayElements.forEach(function (dayElement) {
+        dayElement.addEventListener('click', function () {
+            var day = parseInt(this.textContent); 
+            console.log("El day es de tipo: " + typeof(day));
+            var selectedDate = getSelectedDate(day);
+            alert("La fecha seleccionada: " + selectedDate);
+        });
+    });
 });
 
 
