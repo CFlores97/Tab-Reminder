@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tab Reminder</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <header class="header-container">
+            <div class="titles">
+                <h1 class="today-title" id="today-title">Today</h1>
+            </div>
+            <div class="settings-container">
+                <button class="settings">
+                    <span><i class="fa-solid fa-sliders"></i></span>
+                </button>
+            </div>
+        </header>
+
+        <main class="main-container">
+            <div class="reminder-container">
+                <ul class="items">
+                    <li class="action-buttons">
+                        <div id="addBtn" class="addDiv">
+                            <i class="fa-solid fa-plus"></i>
+                            <a href="">Add Reminder</a>
+                        </div>
+                    </li>
+                    <div id="formularioRecordatorio">
+                        <h2 class="add-title">New Reminder</h2>
+                        <div id="custom-form">
+                            <input type="text" id="title-input" placeholder="Reminder name" class="task-name">
+                            <textarea placeholder="Description" class="task-desc"></textarea>
+                        </div>
+                        <div class="task-options">
+                            <button class="task-option-btn" id="date-btn">
+                                <span class="icon"><i class="fa-regular fa-calendar"></i></span>
+                                <span>Today</span>
+                            </button>
+                            
+                            <button class="task-option-btn" id="priority-menu-btn">
+                                <span class="icon"><i class="fa-solid fa-circle"></i></span>
+                                <span>Priority</span>
+                            </button>
+
+                        </div>
+                        <div class="calendar-container">
+                            <div class="container_change_month">
+                                <button id="last_month">&lt;</button>
+                                <div>
+                                    <span id="text_month_02">Null</span>
+                                    <span id="text_year">0000</span>
+                                </div>
+                                <button id="next_month">&gt;</button>
+                            </div>
+                            <div class="container_weedays">
+                                <span class="week_days_item">SUN</span>
+                                <span class="week_days_item">MON</span>
+                                <span class="week_days_item">TUE</span>
+                                <span class="week_days_item">WED</span>
+                                <span class="week_days_item">THU</span>
+                                <span class="week_days_item">FRI</span>
+                                <span class="week_days_item">SAT</span>
+                            </div>
+                            <div class="container_days">
+                                <span class="week_days_item item_day"></span>
+                            </div>
+                        </div>
+                        <div class="priority-dropdown" id="priority-menu">
+                            <ul class="priorities" id="priorities">
+                                <li>
+                                    <button class="priority-btn" id="priority-btn">
+                                        <span><i class="fa-solid fa-circle" style="color: #d1453b;"></i></span>
+                                        <span>1 Priority</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="priority-btn" id="priority-btn">
+                                        <span><i class="fa-solid fa-circle" style="color: #EB8909;"></i></span>
+                                        <span>2 Priority</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="priority-btn" id="priority-btn">
+                                        <span><i class="fa-solid fa-circle" style="color: #246FE0;"></i></span>
+                                        <span>3 Priority</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="priority-btn" id="priority-btn">
+                                        <span><i class="fa-regular fa-circle"></i></span>
+                                        <span>0 Priority</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="task-footer">
+
+                            <div class="footer-buttons">
+                                <button class="cancel-btn" id="cancel-btn">
+                                    <span class="icon"><i class="fa-solid fa-x"></i></span>
+                                </button>
+                                <button class="save-btn" id="save-btn">
+                                    <span class="icon"><i class="fa-solid fa-check"></i></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </ul>
+            </div>
+        </main>
+    </div>
+    <div id="bg-image" class="div-image">
+        <img src="Recursos/bg.png" alt="pot and coffee image" width="300" height="300">
+        <h2 class="question">What do you need to get done?</h2>
+        <h2 class="instructions">In order to add a reminder, <br>click on the "Add Reminder" button!</h2>
+    </div>
+
+</body>
+<script src="script.js"></script>
+
+</html>

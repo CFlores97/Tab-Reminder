@@ -1,0 +1,23 @@
+{
+    "name": "Tab Reminder",
+    "version": "1.0",
+    "manifest_version": 3,
+    "description": "This extension provides reminders set by the user, based on a specific website he is visiting",
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["script.js"]
+        }
+
+    ],
+        
+    "permissions": [
+        "tabs",
+        "storage",
+        "activeTab"
+    ],
+    "action":{
+        "default_popup":"index.html",
+        "default_title": "Tab Reminder"
+    }
+}
