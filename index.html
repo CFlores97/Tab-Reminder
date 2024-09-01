@@ -24,7 +24,7 @@
 
         <main class="main-container">
             <div class="reminder-container">
-                <ul class="items">
+                <ul class="items" id="items">
                     <li class="action-buttons">
                         <div id="addBtn" class="addDiv">
                             <i class="fa-solid fa-plus"></i>
@@ -35,7 +35,7 @@
                         <h2 class="add-title">New Reminder</h2>
                         <div id="custom-form">
                             <input type="text" id="title-input" placeholder="Reminder name" class="task-name">
-                            <textarea placeholder="Description" class="task-desc"></textarea>
+                            <textarea placeholder="Description" id="rem-description" class="task-desc"></textarea>
                         </div>
                         <div class="task-options">
                             <button class="task-option-btn" id="date-btn">
