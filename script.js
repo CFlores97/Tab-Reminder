@@ -28,14 +28,18 @@ function initCalendar() {
 
     container.innerHTML = '';
 
+    // mostrar los dias del mes anterior en el calendario, los que salen en gris
     for (let i = getStartDay(); i > 0; i--) {
         var prevMonthDay = document.createElement('span');
         prevMonthDay.className = "week_days_item item_day prev_days";
-        prevMonthDay.textContent = getTotalDays(month - 1) - (i - 1);
+        let prevMonth = month - 1 < 0 ? 11 : month - 1;
+        let prevMonthYear = month - 1 < 0 ? year - 1 : year;
+        prevMonthDay.textContent = getTotalDays(prevMonth, prevMonthYear) - (i - 1);
 
         container.appendChild(prevMonthDay);
     }
 
+    // mostrar los dias actuales del mes en el calendario, asi mismo marcar el dia actual
     for (let i = 1; i <= getTotalDays(month); i++) {
         var diaSpan = document.createElement('span');
         if (i === day && month === currentMonth) {
@@ -73,13 +77,13 @@ function getPrevMonth() {
 }
 
 // determina si el ano es bisiesto
-function isBisiesto() {
+function isBisiesto(year) {
 
     return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
 }
 
 // retorna el total de dias de cada mes
-function getTotalDays() {
+function getTotalDays(month, year) {
     var monthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
     if (month === 1) { // February
@@ -143,12 +147,8 @@ function validateForm(reminderTit) {
     return reminderTit === "" ? false : true;
 }
 
-function onSaveClick(date) {
-
-}
-
 //metodo para crear el elemento div que sera el "reminder" como tal 
-function createReminderElement(reminderTit, sDate, sPriority) {
+function createReminderElement(reminderTit) {
     var reminder = document.createElement("div");
     reminder.id = "reminderElement";
 
@@ -184,15 +184,6 @@ function createReminderElement(reminderTit, sDate, sPriority) {
     }
 
     //logica para la fecha 
-    if (sDate != null) {
-        var remDate = document.createElement('p');
-        remDate.id = "reminderDate";
-        remDate.innerHTML  = sDate;
-        reminder.appendChild(remDate);
-    }
-
-    //logica para el nivel de prioridad
-
 
     document.getElementById("items").appendChild(reminder);
 }
@@ -272,56 +263,66 @@ document.getElementById("cancel-btn").addEventListener('click', function () {
     setTimeout(setFormInvisible, 500);
 });
 
-document.addEventListener('DOMContentLoaded', function () {
-    var dayElements = document.querySelectorAll('.item_day');
-    var priorities = document.querySelectorAll('.priority-btn');
+document.getElementById("save-btn").addEventListener('click', function () {
+    try {
 
-    var selPriority = null;
-    var selectedDate = null;
+        var input_area = document.getElementById("title-input");
+        var reminderTit = input_area.value;
 
-    // logica para seleccionar la fecha 
-    dayElements.forEach(function (dayElement) {
-        dayElement.addEventListener('click', function () {
-            var day = parseInt(this.textContent);
-            console.log("El day es de tipo: " + typeof (day));
-            selectedDate = getSelectedDate(day);
-
-            // TODO: Logica para utilizar la fecha seleccionada
-            //alert("La fecha seleccionada: " + selectedDate.toDateString());
-        });
-    });
-
-    // logica para seleccionar el nivel de prioridad del recordatorio
-    priorities.forEach(function (priorityElement) {
-        priorityElement.addEventListener('click', function () {
-            selPriority = this.textContent;
-            selPriority.trim();
-            //alert("La prioridad seleccionada es: " + selPriority);
-        });
-    });
-
-    // logica para guardar el recordatorio
-    document.getElementById("save-btn").addEventListener('click', function () {
-        try {
-
-            var input_area = document.getElementById("title-input");
-            var reminderTit = input_area.value;
-
-            if (validateForm(reminderTit)) {
-                //TODO: Logica para agregar el recordatorio
-                alert("La fecha seleccionada: " + selectedDate.toDateString());
-                createReminderElement(reminderTit, selectedDate, selPriority);
-            }
-            else {
-                alert("Acuerdate de no dejar vacio el campo del titulo!");
-            }
-        } catch (error) {
-            alert("Ocurrio un error!");
-            console.log("Error: ", error.message);
+        if (validateForm(reminderTit)) {
+            //TODO: Logica para agregar el recordatorio
+            createReminderElement(reminderTit);
         }
-    });
+        else {
+            alert("Acuerdate de no dejar vacio el campo del titulo!");
+        }
+    } catch (error) {
+        alert("Ocurrio un error!");
+        console.log("Error: ", error.message);
+    }
 });
 
+document.addEventListener('DOMContentLoaded', function () {
+    // se utiliza delegacion de eventos
+    var container = document.querySelector(".container_days");
 
+    // se le agrega un solo listener al contenedor de los dias, en lugar de todos los dias por individual
+    container.addEventListener('click', function (event) {
+        if (event.target.classList.contains('prev_days')) {
+            var day = parseInt(event.target.textContent);
+            var currentMonth = month;
+            var currentYear = year;
 
+            // Calcular el mes y año correctos para los días del mes anterior
+            var prevMonth = currentMonth - 1;
+            var prevMonthYear = currentYear;
+            if (prevMonth < 0) {
+                prevMonth = 11;
+                prevMonthYear--;
+            }
+
+            var selectedDate = new Date(prevMonthYear, prevMonth, day);
+
+            alert("La fecha seleccionada del mes anterior es: " + selectedDate.toDateString());
+
+        }
+        else if (event.target.classList.contains('item_day')) {
+            var day = parseInt(event.target.textContent);
+            var selectedDate = getSelectedDate(day);
+            
+            alert("La fecha seleccionada es: " + selectedDate.toDateString());
+        }
+    })
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    var priorities = document.querySelectorAll('.priority-btn');
+    priorities.forEach(function (priorityElement) {
+        priorityElement.addEventListener('click', function () {
+            var selPriority = this.textContent;
+            selPriority.trim();
+            alert("La prioridad seleccionada es: " + selPriority);
+        });
+    });
+});
 

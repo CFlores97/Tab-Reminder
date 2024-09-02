@@ -141,14 +141,16 @@ body {
     height: 1.7rem;
 }
 
-#reminderDesc, #reminderDate {
+#reminderDesc{
     font-size: 1.3rem;
-    margin-bottom: 1rem;
     padding: 1rem;
 }
 
 #reminderDate {
     color: #34D399;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
 }
 
 .add-title {
