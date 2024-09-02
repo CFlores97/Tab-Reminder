@@ -127,14 +127,23 @@ function setFormInvisible() {
     form.style.display = 'none';
     var temp_img = document.getElementById("bg-image");
     temp_img.style.display = 'block'
+    var temReminder = document.querySelectorAll("#reminderElement");
+
+    for(let i = 0; i < temReminder.length; i++){
+        temReminder[i].style.display = 'block';
+    }
 }
 
 // Se encarga de verificar si el formulario esta oculto
-function addReminderLogic(form, bg_img) {
+function addReminderLogic(form, bg_img, reminderEls) {
     if (form.style.display === 'none' || form.style.display === '') {
         form.style.display = 'block';
         setTimeout(setFormVisible, 10);
         bg_img.style.display = 'none';
+        
+        for(let i = 0; i < reminderEls.length; i++){
+            reminderEls[i].style.display = 'none';
+        }
 
     } else {
         form.style.opacity = 0;
@@ -148,7 +157,7 @@ function validateForm(reminderTit) {
 }
 
 //metodo para crear el elemento div que sera el "reminder" como tal 
-function createReminderElement(reminderTit) {
+function createReminderElement(reminderTit, sDate) {
     var reminder = document.createElement("div");
     reminder.id = "reminderElement";
 
@@ -184,8 +193,32 @@ function createReminderElement(reminderTit) {
     }
 
     //logica para la fecha 
+    if (sDate != null) {
+        var remDate = document.createElement('p');
+        remDate.id = "reminderDate";
+        remDate.innerHTML = sDate.toDateString();
+        reminder.appendChild(remDate);
+    }
+
+    //logica para el nivel de prioridad
 
     document.getElementById("items").appendChild(reminder);
+}
+
+// metodo para esconder calendario 
+function hideCalendar(calendar) {
+    calendar.style.opacity = 0;
+    setTimeout(() => {
+        calendar.style.display = 'none';
+    }, 500);
+}
+
+// metodo para mostrar calendario
+function displayCalendar(calendar) {
+    calendar.style.display = 'flex';
+    setTimeout(() => {
+        calendar.style.opacity = 1;
+    }, 10);
 }
 
 /* Eventos de los botones */
@@ -203,8 +236,11 @@ document.getElementById("addBtn").addEventListener('click', function (event) {
     // background image
     var bg_img = document.getElementById("bg-image");
 
+    // reminder element
+    var reminderEls = document.querySelectorAll("#reminderElement");
+
     // Se encarga de verificar si el formulario esta oculto
-    addReminderLogic(form, bg_img);
+    addReminderLogic(form, bg_img, reminderEls);
 });
 
 document.getElementById("priority-menu-btn").addEventListener('click', function () {
@@ -243,16 +279,10 @@ document.getElementById("date-btn").addEventListener('click', function () {
     }
 
     if (calendar.style.display === 'none' || calendar.style.display === '') {
-        calendar.style.display = 'flex';
-        setTimeout(() => {
-            calendar.style.opacity = 1;
-        }, 10);
+        displayCalendar(calendar);
     }
     else {
-        calendar.style.opacity = 0;
-        setTimeout(() => {
-            calendar.style.display = 'none';
-        }, 500);
+        hideCalendar(calendar);
     }
 });
 
@@ -263,56 +293,64 @@ document.getElementById("cancel-btn").addEventListener('click', function () {
     setTimeout(setFormInvisible, 500);
 });
 
-document.getElementById("save-btn").addEventListener('click', function () {
-    try {
-
-        var input_area = document.getElementById("title-input");
-        var reminderTit = input_area.value;
-
-        if (validateForm(reminderTit)) {
-            //TODO: Logica para agregar el recordatorio
-            createReminderElement(reminderTit);
-        }
-        else {
-            alert("Acuerdate de no dejar vacio el campo del titulo!");
-        }
-    } catch (error) {
-        alert("Ocurrio un error!");
-        console.log("Error: ", error.message);
-    }
-});
-
 document.addEventListener('DOMContentLoaded', function () {
     // se utiliza delegacion de eventos
     var container = document.querySelector(".container_days");
+    var calendar = document.querySelector(".calendar-container");
+    var selectedDate = null;
 
     // se le agrega un solo listener al contenedor de los dias, en lugar de todos los dias por individual
     container.addEventListener('click', function (event) {
-        if (event.target.classList.contains('prev_days')) {
-            var day = parseInt(event.target.textContent);
-            var currentMonth = month;
-            var currentYear = year;
+        try {
+            // logica para seleccionar dias previos 
+            if (event.target.classList.contains('prev_days')) {
+                var day = parseInt(event.target.textContent);
+                var currentMonth = month;
+                var currentYear = year;
 
-            // Calcular el mes y año correctos para los días del mes anterior
-            var prevMonth = currentMonth - 1;
-            var prevMonthYear = currentYear;
-            if (prevMonth < 0) {
-                prevMonth = 11;
-                prevMonthYear--;
+                // Calcular el mes y año correctos para los días del mes anterior
+                var prevMonth = currentMonth - 1;
+                var prevMonthYear = currentYear;
+                if (prevMonth < 0) {
+                    prevMonth = 11;
+                    prevMonthYear--;
+                }
+
+                selectedDate = new Date(prevMonthYear, prevMonth, day);
+                hideCalendar(calendar);
             }
-
-            var selectedDate = new Date(prevMonthYear, prevMonth, day);
-
-            alert("La fecha seleccionada del mes anterior es: " + selectedDate.toDateString());
-
+            // logica para seleccionar dias del mes que se esta presentando en la vista
+            else if (event.target.classList.contains('item_day')) {
+                var day = parseInt(event.target.textContent);
+                selectedDate = getSelectedDate(day);
+                hideCalendar(calendar)
+            }
+        } catch (error) {
+            alert("Ocurrio un error al seleccionar una fecha!");
+            console.log("Error: ", error.message);
         }
-        else if (event.target.classList.contains('item_day')) {
-            var day = parseInt(event.target.textContent);
-            var selectedDate = getSelectedDate(day);
-            
-            alert("La fecha seleccionada es: " + selectedDate.toDateString());
+    });
+
+    // evento para guardar el recordatorio
+    document.getElementById("save-btn").addEventListener('click', function () {
+        try {
+
+            var input_area = document.getElementById("title-input");
+            var reminderTit = input_area.value;
+
+            if (validateForm(reminderTit)) {
+                //TODO: Logica para agregar el recordatorio
+                createReminderElement(reminderTit, selectedDate);
+                setFormInvisible();
+            }
+            else {
+                alert("Acuerdate de no dejar vacio el campo del titulo!");
+            }
+        } catch (error) {
+            alert("Ocurrio un error!");
+            console.log("Error: ", error.message);
         }
-    })
+    });
 });
 
 document.addEventListener('DOMContentLoaded', function () {
