@@ -153,6 +153,24 @@ body {
     padding: 0.5rem;
 }
 
+#reminderDeleteBtn {
+    border: none;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: transparent;
+    cursor: pointer;
+    
+}
+
+#time-picker {
+    border: none;
+}
+
+#reminderDeleteBtn:hover { 
+    color: #f82525;
+}
+
 .add-title {
     font-size: 2rem;
     margin-bottom: 2rem;
