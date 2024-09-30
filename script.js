@@ -163,12 +163,41 @@ function createReminderElement(reminderObj) {
     reminder.className = "reminderElement";
     reminder.setAttribute('data-reminder-id', reminderObj.id);
 
-    // Crea un elemento input
+    // Crea un elemento input (checkbox)
     var reminderTitleEl = document.createElement('input');
     reminderTitleEl.id = "checkbox-id";
     reminderTitleEl.type = 'checkbox';
     reminderTitleEl.name = 'name';
     reminderTitleEl.value = 'value';
+    reminderTitleEl.checked = reminderObj.completed || false;
+
+    // Evento al hacer clic en el checkbox
+    reminderTitleEl.addEventListener('change', function () {
+        // Actualizar el estado en chrome.storage.local
+        chrome.storage.local.get({ reminders: [] }, function (data) {
+            const reminders = data.reminders.map(r => {
+                if (r.id === reminderObj.id) {
+                    r.completed = reminderTitleEl.checked;
+                }
+                return r;
+            });
+            chrome.storage.local.set({ reminders: reminders }, function () {
+                console.log('Estado del recordatorio actualizado:', reminderObj.id);
+            });
+        });
+
+        // Actualizar la interfaz de usuario
+        if (reminderTitleEl.checked) {
+            label.style.textDecoration = 'line-through';
+        } else {
+            label.style.textDecoration = 'none';
+        }
+    });
+
+    // Establecer el estilo inicial
+    if (reminderTitleEl.checked) {
+        label.style.textDecoration = 'line-through';
+    }
 
     // Crea un label para el recordatorio
     var label = document.createElement('label');
@@ -208,7 +237,7 @@ function createReminderElement(reminderObj) {
     delIcon.style.color = '#f82525';
     deleteButton.appendChild(delIcon);
 
-    // Texto de eliminar
+    // Texto
     var deleteText = document.createTextNode(" Delete");
     deleteButton.appendChild(deleteText);
 
@@ -229,86 +258,49 @@ function createReminderElement(reminderObj) {
     return reminder;
 }
 
+function getNormalizedDomain(tabUrl) {
+    try {
+        if (tabUrl.startsWith('http://') || tabUrl.startsWith('https://')) {
+            var domain = (new URL(tabUrl)).hostname;
+            domain = domain.replace(/^www\./, '').toLowerCase();
+            return domain;
+        } else {
+            // Manejar URLs especiales
+            return tabUrl; // O 'unknown', según prefieras
+        }
+    } catch (error) {
+        console.error('Error al analizar la URL:', error);
+        return 'unknown';
+    }
+}
 
 //metodo para agregar recordatorios existentes 
-function loadReminders(reminderObj) {
-    const reminderContainer = document.getElementById("items");
+function loadReminders(tabDomain) {
+    const remContainer = document.getElementById("items");
 
-    //crear el div nuevamente
-    var reminder = document.createElement("div");
-    reminder.id = "reminderElement";
-    reminder.className = "reminderElement";
+    // Eliminar los recordatorios existentes en el DOM
+    const reminders = remContainer.querySelectorAll(".reminderElement");
+    reminders.forEach(reminder => reminder.remove());
 
-    // crea un elemento input
-    var reminderTitleEl = document.createElement('input');
-    reminderTitleEl.id = "checkbox-id";
+    // Cargar recordatorios desde el almacenamiento
+    chrome.storage.local.get({ reminders: [] }, function (data) {
+        if (data.reminders && data.reminders.length > 0) {
+            // Filtrar los recordatorios que coincidan con el dominio actual
+            const filteredReminders = data.reminders.filter(reminderObj => {
+                return reminderObj.domain === tabDomain;
+            });
 
-    reminderTitleEl.type = 'checkbox';
-    reminderTitleEl.name = 'name';
-    reminderTitleEl.value = 'value';
-
-    // crea un label para el recordatorio
-    var label = document.createElement('label');
-    label.htmlFor = "checkbox-id";
-    label.id = "reminderTitle";
-
-    // obtiene el nombre del recordatorio
-    var labelValue = reminderObj.title;
-    labelValue.id = "reminderTitle"
-    label.appendChild(labelValue);
-
-    reminder.appendChild(reminderTitleEl);
-    reminder.appendChild(label);
-
-    //descripcion
-    var descriptionEl = reminderObj.description;
-
-    if (descriptionEl !== "") {
-        var remDesc = document.createElement('p');
-        remDesc.id = reminderDesc;
-        remDesc.innerHTML = descriptionEl;
-        reminder.appendChild(remDesc);
-    }
-
-    //fecha y hora
-    const loadDate = reminderObj.date;
-    const loadTime = reminderObj.time;
-
-    if (loadDate !== null && loadTime !== null) {
-        var remDate = document.createElement('p');
-        remDate.id = "reminderDate";
-        remDate.innerHTML = `${loadDate} at ${loadTime}`;
-        reminder.appendChild(remDate);
-    }
-    else {
-        alert("Algo ocurrio al cargar la fecha y la hora!");
-    }
-
-    // Create Delete button
-    var deleteButton = document.createElement('button');
-    deleteButton.id = "reminderDeleteBtn"
-
-    //icon 
-    var delIcon = document.createElement('i');
-    delIcon.className = "fa-regular fa-trash-can";
-    delIcon.style.color = '#f82525';
-    deleteButton.appendChild(delIcon);
-
-    //Texto
-    var deleteText = document.createTextNode(" Delete");
-    deleteButton.appendChild(deleteText);
-
-    deleteButton.onclick = function () {
-        // Add your logic for deleting here
-        console.log('Delete button clicked for:', reminderTit);
-        reminder.remove(); // This removes the reminder from the DOM
-    };
-    reminder.appendChild(deleteButton);
-
-    reminderContainer.appendChild(reminder);
-
-
+            // Agregar los recordatorios filtrados al DOM
+            filteredReminders.forEach(reminderObj => {
+                const reminderElement = createReminderElement(reminderObj);
+                remContainer.appendChild(reminderElement);
+            });
+        } else {
+            console.log("No hay recordatorios para cargar.");
+        }
+    });
 }
+
 
 // metodo para esconder calendario 
 function hideCalendar(calendar) {
@@ -325,6 +317,7 @@ function displayCalendar(calendar) {
         calendar.style.opacity = 1;
     }, 10);
 }
+
 
 /* Eventos de los botones */
 
@@ -398,34 +391,23 @@ document.getElementById("cancel-btn").addEventListener('click', function () {
     setTimeout(setFormInvisible, 500);
 });
 
+
 document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('testNotification').addEventListener('click', function() {
-        chrome.notifications.create({
-            type: 'basic',
-            title: 'Prueba de Notificación',
-            message: 'Si ves esto, ¡las notificaciones funcionan!',
-            priority: 2
-        });
-    });
     // se utiliza delegacion de eventos
     var container = document.querySelector(".container_days");
     var calendar = document.querySelector(".calendar-container");
-    const remContainer = document.getElementById("items");
     var selectedDate = null;
 
-    const reminders = remContainer.querySelectorAll(".reminderElement");
-    reminders.forEach(reminder => reminder.remove());
+    //tab actual
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        var activeTab = tabs[0];
+        var tabUrl = activeTab.url;
+        var tabDomain = getNormalizedDomain(tabUrl);
 
-    // Cargar recordatorios existentes
-    chrome.storage.local.get({ reminders: [] }, function (data) {
-        if (data.reminders && data.reminders.length > 0) {
-            data.reminders.forEach(reminderObj => {
-                const reminderElement = createReminderElement(reminderObj);
-                remContainer.appendChild(reminderElement);
-            });
-        } else {
-            console.log("No hay recordatorios para cargar.");
-        }
+        console.log('Tab URL:', tabUrl);
+        console.log('Tab Domain:', tabDomain);
+
+        loadReminders(tabDomain);
     });
 
     // se le agrega un solo listener al contenedor de los dias, en lugar de todos los dias por individual
@@ -472,55 +454,74 @@ document.addEventListener('DOMContentLoaded', function () {
             var descriptionEl = document.getElementById("rem-description");
             var description = descriptionEl.value;
 
+            //validacion de fecha
+            var currentDateTime = new Date();
+
             if (validateForm(reminderTit)) {
                 if (selectedTime) {
                     var [hours, minutes] = selectedTime.split(':');
                     selectedDate.setHours(hours, minutes, 0, 0);
                     var formattedTime = `${hours}:${minutes}`;
 
-                    var reminderObj = {
-                        title: reminderTit,
-                        description: description,
-                        date: selectedDate.toDateString(),
-                        time: formattedTime,
-                        id: selectedDate.getTime()
-                    };
+                    if (selectedDate < currentDateTime) {
+                        alert("No puedes seleccionar fechas y horas pasadas!");
+                        return;
+                    }
 
-                    // Guardar en el almacenamiento
-                    chrome.storage.local.get({ reminders: [] }, (data) => {
-                        const reminders = data.reminders;
-                        reminders.push(reminderObj);
-                        chrome.storage.local.set({ reminders: reminders }, () => {
-                            console.log("Recordatorio guardado en el almacenamiento");4
+                    //al crear un recordatorio, almacena el dominio de la tab actual
+                    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                        var activeTab = tabs[0];
+                        var tabUrl = activeTab.url;
+                        var tabDomain = getNormalizedDomain(tabUrl);
 
-                            // Creando una alarma
-                            chrome.runtime.sendMessage({
-                                action: 'createAlarm',
-                                reminder: reminderObj
+                        console.log('Tab URL:', tabUrl);
+                        console.log('Tab Domain:', tabDomain);
+
+                        var reminderObj = {
+                            title: reminderTit,
+                            description: description,
+                            date: selectedDate.toDateString(),
+                            time: formattedTime,
+                            id: selectedDate.getTime(),
+                            domain: tabDomain
+                        };
+
+                        // Guardar en el almacenamiento
+                        chrome.storage.local.get({ reminders: [] }, (data) => {
+                            const reminders = data.reminders;
+                            reminders.push(reminderObj);
+                            chrome.storage.local.set({ reminders: reminders }, () => {
+                                console.log("Recordatorio guardado en el almacenamiento");
+
+                                // Creando una alarma
+                                chrome.runtime.sendMessage({
+                                    action: 'createAlarm',
+                                    reminder: reminderObj
+                                });
                             });
                         });
+
+                        // Crear elemento de recordatorio y agregar al DOM
+                        const reminderElement = createReminderElement(reminderObj);
+                        document.getElementById("items").appendChild(reminderElement);
+
+                        setFormInvisible();
                     });
 
-                    // Crear elemento de recordatorio y agregar al DOM
-                    const reminderElement = createReminderElement(reminderObj);
-                    document.getElementById("items").appendChild(reminderElement);
 
-                    setFormInvisible();
                 } else {
                     alert("¡Asegúrese de seleccionar la hora a la que se notificará su recordatorio!");
                 }
             } else {
                 alert("¡Acuérdate de no dejar vacío el campo del título!");
             }
+
         } catch (error) {
             alert("Ocurrio un error!");
             console.log("Error: ", error.message);
         }
     });
 });
-
-
-
 document.addEventListener('DOMContentLoaded', function () {
     var priorities = document.querySelectorAll('.priority-btn');
     priorities.forEach(function (priorityElement) {
