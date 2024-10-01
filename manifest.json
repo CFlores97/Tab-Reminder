@@ -4,7 +4,8 @@
     "manifest_version": 3,
     "description": "This extension provides reminders set by the user, based on a specific website he or she is visiting.",
     "icons": {
-        "16": "icono/schnauzer.png"
+        "16": "icono/schnauzer.png",
+        "128": "icono/schnauzer2.png"
     },
     "content_scripts": [
         {
