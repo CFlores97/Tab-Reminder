@@ -1,8 +1,8 @@
 {
-    "name": "Tab Reminder",
+    "name": "TabMinder",
     "version": "1.0",
     "manifest_version": 3,
-    "description": "This extension provides reminders set by the user, based on a specific website he is visiting",
+    "description": "This extension provides reminders set by the user, based on a specific website he or she is visiting.",
     "icons": {
         "16": "icono/schnauzer.png"
     },

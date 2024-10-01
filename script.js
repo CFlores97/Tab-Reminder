@@ -109,8 +109,6 @@ function getSelectedDate(day) {
     var selYear = parseInt(yearElement);
     //var selMonth = parseInt(monthElement);
 
-    console.log("Año: " + selYear + ", Mes: " + monthElement + ", Día: " + day);
-
     var selDate = new Date(selYear, selMonth, day);
     return selDate;
 }
@@ -126,7 +124,7 @@ function setFormInvisible() {
     var form = document.getElementById("formularioRecordatorio");
     form.style.display = 'none';
     var temp_img = document.getElementById("bg-image");
-    temp_img.style.display = 'none'
+    temp_img.style.display = 'block'
     var temReminder = document.querySelectorAll("#reminderElement");
 
     for (let i = 0; i < temReminder.length; i++) {
@@ -182,7 +180,7 @@ function createReminderElement(reminderObj) {
                 return r;
             });
             chrome.storage.local.set({ reminders: reminders }, function () {
-                console.log('Estado del recordatorio actualizado:', reminderObj.id);
+                console.log('Reminder status updated:', reminderObj.id);
             });
         });
 
@@ -249,7 +247,7 @@ function createReminderElement(reminderObj) {
         chrome.storage.local.get({ reminders: [] }, function (data) {
             const filteredReminders = data.reminders.filter(r => r.id !== reminderObj.id);
             chrome.storage.local.set({ reminders: filteredReminders }, function () {
-                console.log('Recordatorio eliminado del almacenamiento:', reminderObj.id);
+                console.log('Reminder removed from storage:', reminderObj.id);
             });
         });
     };
@@ -269,7 +267,7 @@ function getNormalizedDomain(tabUrl) {
             return tabUrl;
         }
     } catch (error) {
-        console.error('Error al analizar la URL:', error);
+        console.error('Error parsing URL:', error);
         return 'unknown';
     }
 }
@@ -296,7 +294,7 @@ function loadReminders(tabDomain) {
                 remContainer.appendChild(reminderElement);
             });
         } else {
-            console.log("No hay recordatorios para cargar.");
+            console.log("There are no reminders to load.");
         }
     });
 }
@@ -394,6 +392,8 @@ document.getElementById("cancel-btn").addEventListener('click', function () {
 
 document.addEventListener('DOMContentLoaded', function () {
     const prioBtn = document.getElementById("priority-menu-btn");
+    const settingsBtn = document.getElementById("settings");
+    settingsBtn.style.display = 'none';
     prioBtn.style.display = 'none';
 
     // se utiliza delegacion de eventos
@@ -406,9 +406,6 @@ document.addEventListener('DOMContentLoaded', function () {
         var activeTab = tabs[0];
         var tabUrl = activeTab.url;
         var tabDomain = getNormalizedDomain(tabUrl);
-
-        console.log('Tab URL:', tabUrl);
-        console.log('Tab Domain:', tabDomain);
 
         loadReminders(tabDomain);
     });
@@ -442,7 +439,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
         } catch (error) {
-            alert("Ocurrio un error al seleccionar una fecha!");
+            alert("An error occurred while selecting a date!");
             console.log("Error: ", error.message);
         }
     });
@@ -467,7 +464,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     var formattedTime = `${hours}:${minutes}`;
 
                     if (selectedDate < currentDateTime) {
-                        alert("No puedes seleccionar fechas y horas pasadas!");
+                        alert("You cant select previous dates or times!");
                         return;
                     }
 
@@ -494,7 +491,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             const reminders = data.reminders;
                             reminders.push(reminderObj);
                             chrome.storage.local.set({ reminders: reminders }, () => {
-                                console.log("Recordatorio guardado en el almacenamiento");
+                                console.log("Reminder saved in storage");
 
                                 // Creando una alarma
                                 chrome.runtime.sendMessage({
@@ -513,26 +510,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
                 } else {
-                    alert("¡Asegúrese de seleccionar la hora a la que se notificará su recordatorio!");
+                    alert("Be sure to select the time your reminder will be notified!");
                 }
             } else {
-                alert("¡Acuérdate de no dejar vacío el campo del título!");
+                alert("Make sure to not leave the reminder title in blank!");
             }
 
         } catch (error) {
-            alert("Ocurrio un error!");
+            alert("An error occurred");
             console.log("Error: ", error.message);
         }
-    });
-});
-document.addEventListener('DOMContentLoaded', function () {
-    var priorities = document.querySelectorAll('.priority-btn');
-    priorities.forEach(function (priorityElement) {
-        priorityElement.addEventListener('click', function () {
-            var selPriority = this.textContent;
-            selPriority.trim();
-            alert("La prioridad seleccionada es: " + selPriority);
-        });
     });
 });
 
