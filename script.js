@@ -266,7 +266,7 @@ function getNormalizedDomain(tabUrl) {
             return domain;
         } else {
             // Manejar URLs especiales
-            return tabUrl; // O 'unknown', según prefieras
+            return tabUrl;
         }
     } catch (error) {
         console.error('Error al analizar la URL:', error);
@@ -393,6 +393,9 @@ document.getElementById("cancel-btn").addEventListener('click', function () {
 
 
 document.addEventListener('DOMContentLoaded', function () {
+    const prioBtn = document.getElementById("priority-menu-btn");
+    prioBtn.style.display = 'none';
+
     // se utiliza delegacion de eventos
     var container = document.querySelector(".container_days");
     var calendar = document.querySelector(".calendar-container");
